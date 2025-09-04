@@ -1,0 +1,316 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<style>
+    .filter-form {
+        margin-bottom: 20px;
+        padding: 15px;
+        background-color: #f8f9fa;
+        border-radius: 5px;
+    }
+    
+    .filter-controls {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+    
+    .search-input {
+        padding: 8px 12px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        width: 250px;
+    }
+    
+    .position-filter {
+        padding: 8px 12px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        background-color: white;
+    }
+    
+    .filter-button {
+        padding: 8px 16px;
+        background-color: #007bff;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+    
+    .filter-button:hover {
+        background-color: #0056b3;
+    }
+    
+    .clear-filters {
+        color: #6c757d;
+        text-decoration: none;
+        margin-left: 10px;
+    }
+    
+    .clear-filters:hover {
+        text-decoration: underline;
+    }
+    
+    .player-count {
+        font-style: italic;
+        color: #6c757d;
+        margin-bottom: 15px;
+    }
+    
+    .no-results {
+        text-align: center;
+        font-style: italic;
+        color: #6c757d;
+        padding: 40px;
+        grid-column: 1 / -1;
+    }
+    
+    .player-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        gap: 20px;
+    }
+    
+    .player-card {
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        padding: 15px;
+        text-align: center;
+        transition: transform 0.2s, box-shadow 0.2s;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+    }
+    
+    .player-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    
+    .player-image {
+        width: 100%;
+        height: 150px;
+        object-fit: cover;
+        border-radius: 3px;
+        margin-bottom: 10px;
+        background-color: #f5f5f5;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #999;
+        font-size: 14px;
+    }
+    
+    .bid-button {
+        display: inline-block;
+        margin-top: 10px;
+        padding: 8px 16px;
+        background-color: #28a745;
+        color: white;
+        text-decoration: none;
+        border-radius: 4px;
+        border: none;
+        cursor: pointer;
+    }
+    
+    .bid-button:hover {
+        background-color: #218838;
+    }
+    
+    /* Modal styles */
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0,0,0,0.5);
+    }
+    
+    .modal-content {
+        background-color: #fff;
+        margin: 15% auto;
+        padding: 20px;
+        border-radius: 5px;
+        width: 80%;
+        max-width: 400px;
+        position: relative;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    }
+    
+    .close {
+        color: #aaa;
+        float: right;
+        font-size: 28px;
+        font-weight: bold;
+        cursor: pointer;
+        position: absolute;
+        right: 15px;
+        top: 10px;
+    }
+    
+    .close:hover {
+        color: #000;
+    }
+    
+    .modal-buttons {
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+        margin-top: 20px;
+    }
+    
+    .btn-cancel {
+        padding: 8px 16px;
+        background-color: #6c757d;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+    
+    .btn-login {
+        padding: 8px 16px;
+        background-color: #007bff;
+        color: white;
+        text-decoration: none;
+        border-radius: 4px;
+    }
+    
+    /* Responsive design */
+    @media (max-width: 768px) {
+        .filter-controls {
+            flex-direction: column;
+            align-items: stretch;
+        }
+        
+        .search-input, .position-filter, .filter-button {
+            width: 100%;
+        }
+        
+        .player-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+<h1>Players Available for Auction</h1>
+
+<!-- Search and Filter Form -->
+<form method="get" action="{% url 'player_list' %}" class="filter-form">
+    <div class="filter-controls">
+        <!-- Search Input -->
+        <input type="text" name="search" placeholder="Search players..." 
+               value="{{ search_query|default:'' }}" class="search-input">
+        
+        <!-- Position Filter -->
+        <select name="position" class="position-filter">
+            <option value="">All Positions</option>
+            {% for value, label in position_choices %}
+            <option value="{{ value }}" {% if position_filter == value %}selected{% endif %}>
+                {{ label }}
+            </option>
+            {% endfor %}
+        </select>
+        
+        <!-- Submit Button -->
+        <button type="submit" class="filter-button">Apply Filters</button>
+        
+        <!-- Clear Filters -->
+        {% if search_query or position_filter %}
+        <a href="{% url 'player_list' %}" class="clear-filters">Clear Filters</a>
+        {% endif %}
+    </div>
+</form>
+
+<!-- Player Count -->
+<p class="player-count">{{ players.count }} player{{ players.count|pluralize }} found</p>
+
+<div class="player-grid">
+    {% for player in players %}
+    <div class="player-card">
+        <div class="player-image">
+            {% if player.image %}
+                <img src="{{ player.image.url }}" alt="{{ player.name }}" style="width: 100%; height: 100%; object-fit: cover;">
+            {% else %}
+                No Image
+            {% endif %}
+        </div>
+        <h3>{{ player.name }}</h3>
+        <p>Position: {{ player.get_position_display }}</p>
+        <p>market_value: {{ player.market_value }}</p>
+        <p>Style: {{ player.playing_style }}</p>
+        {% if user.is_authenticated %}
+            <a href="{% url 'player_detail' player.pk %}" class="bid-button">View Details & Bid</a>
+        {% else %}
+            <button class="bid-button" onclick="showLoginAlert()">View Details & Bid</button>
+        {% endif %}
+    </div>
+    {% empty %}
+    <p class="no-results">No players found matching your criteria.</p>
+    {% endfor %}
+</div>
+
+<!-- Login Alert Modal -->
+<div id="loginAlert" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeLoginAlert()">&times;</span>
+        <h3>Login Required</h3>
+        <p>You need to be logged in to view player details and place bids.</p>
+        <div class="modal-buttons">
+            <button onclick="closeLoginAlert()" class="btn-cancel">Cancel</button>
+            <a href="{% url 'login' %}" class="btn-login">Login Now</a>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Function to show the login alert modal
+    function showLoginAlert() {
+        document.getElementById('loginAlert').style.display = 'block';
+    }
+    
+    // Function to close the login alert modal
+    function closeLoginAlert() {
+        document.getElementById('loginAlert').style.display = 'none';
+    }
+    
+    // Close the modal if user clicks outside of it
+    window.onclick = function(event) {
+        const modal = document.getElementById('loginAlert');
+        if (event.target === modal) {
+            closeLoginAlert();
+        }
+    };
+    
+    document.addEventListener('DOMContentLoaded', function() {
+        // Get the position filter element
+        const positionFilter = document.querySelector('.position-filter');
+        
+        // Add event listener for change event
+        if (positionFilter) {
+            positionFilter.addEventListener('change', function() {
+                // Submit the form when position changes
+                this.form.submit();
+            });
+        }
+        
+        // Optional: Add debounce to search input
+        const searchInput = document.querySelector('.search-input');
+        let searchTimeout;
+        
+        if (searchInput) {
+            searchInput.addEventListener('input', function() {
+                clearTimeout(searchTimeout);
+                searchTimeout = setTimeout(() => {
+                    this.form.submit();
+                }, 500); // Submit after 500ms of no typing
+            });
+        }
+    });
+</script>
+{% endblock %}

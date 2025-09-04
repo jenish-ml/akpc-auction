@@ -1,0 +1,300 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<style>
+    .player-detail-container {
+        max-width: 1000px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+    
+    .player-header {
+        display: flex;
+        gap: 30px;
+        margin-bottom: 30px;
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+    
+    .player-image {
+        flex-shrink: 0;
+        width: 250px;
+        height: 250px;
+        border-radius: 10px;
+        overflow: hidden;
+        border: 4px solid #fff;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+    
+    .player-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    
+    .player-info {
+        flex-grow: 1;
+    }
+    
+    .player-name {
+        font-size: 2.5rem;
+        margin: 0 0 10px 0;
+        color: #2c3e50;
+    }
+    
+    .player-stats {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 15px;
+        margin: 20px 0;
+    }
+    
+    .stat-card {
+        background: white;
+        padding: 15px;
+        border-radius: 8px;
+        text-align: center;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+    
+    .stat-label {
+        font-size: 0.9rem;
+        color: #6c757d;
+        margin-bottom: 5px;
+    }
+    
+    .stat-value {
+        font-size: 1.4rem;
+        font-weight: bold;
+        color: #2c3e50;
+    }
+    
+    .market_value-badge {
+        display: inline-block;
+        background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+        color: white;
+        padding: 5px 15px;
+        border-radius: 20px;
+        font-weight: bold;
+        font-size: 1.2rem;
+    }
+    
+    .bid-section {
+        background: white;
+        padding: 25px;
+        border-radius: 10px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        margin-bottom: 30px;
+    }
+    
+    .section-title {
+        font-size: 1.8rem;
+        color: #2c3e50;
+        margin-bottom: 20px;
+        padding-bottom: 10px;
+        border-bottom: 2px solid #e9ecef;
+    }
+    
+    .bid-form {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 15px;
+        align-items: end;
+    }
+    
+    .form-group {
+        margin-bottom: 0;
+    }
+    
+    .form-group label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 600;
+        color: #2c3e50;
+    }
+    
+    .form-group input {
+        width: 100%;
+        padding: 12px 15px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        font-size: 1rem;
+        box-sizing: border-box;
+    }
+    
+    .bid-button {
+        padding: 12px 25px;
+        background: linear-gradient(135deg, #00b894 0%, #00a382 100%);
+        color: white;
+        border: none;
+        border-radius: 5px;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+    
+    .bid-button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 184, 148, 0.4);
+    }
+    
+    .bids-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+        background: white;
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+    
+    .bids-table th {
+        background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+        color: white;
+        padding: 15px;
+        text-align: left;
+    }
+    
+    .bids-table td {
+        padding: 15px;
+        border-bottom: 1px solid #e9ecef;
+    }
+    
+    .bids-table tr:last-child td {
+        border-bottom: none;
+    }
+    
+    .bids-table tr:hover {
+        background-color: #f8f9fa;
+    }
+    
+    .no-bids {
+        text-align: center;
+        padding: 30px;
+        color: #6c757d;
+        font-style: italic;
+    }
+    
+    .bid-amount {
+        font-weight: bold;
+        color: #00b894;
+    }
+    
+    /* Responsive design */
+    @media (max-width: 768px) {
+        .player-header {
+            flex-direction: column;
+            text-align: center;
+        }
+        
+        .player-image {
+            margin: 0 auto;
+        }
+        
+        .player-stats {
+            grid-template-columns: 1fr 1fr;
+        }
+        
+        .bid-form {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+<div class="player-detail-container">
+    <div class="player-header">
+        <div class="player-image">
+            {% if player.image %}
+            <img src="{{ player.image.url }}" alt="{{ player.name }}">
+            {% else %}
+            <div style="width: 100%; height: 100%; background: #ddd; display: flex; align-items: center; justify-content: center;">
+                <span>No Image</span>
+            </div>
+            {% endif %}
+        </div>
+        
+        <div class="player-info">
+            <h1 class="player-name">{{ player.name }}</h1>
+            <div class="market_value-badge">market_value: {{ player.market_value }}</div>
+            
+            <div class="player-stats">
+                <div class="stat-card">
+                    <div class="stat-label">Position</div>
+                    <div class="stat-value">{{ player.get_position_display }}</div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-label">Playing Style</div>
+                    <div class="stat-value">{{ player.playing_style }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="bid-section">
+        <h2 class="section-title">Place a Bid</h2>
+        <form method="post" class="bid-form">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="{{ form.amount.id_for_label }}">Bid Amount ($)</label>
+                {{ form.amount }}
+            </div>
+            <button type="submit" class="bid-button">Place Bid</button>
+        </form>
+    </div>
+    
+    <div class="bid-section">
+        <h2 class="section-title">Current Bids</h2>
+        {% if bids %}
+        <table class="bids-table">
+            <thead>
+                <tr>
+                    <th>User</th>
+                    <th>Amount</th>
+                    <th>Time</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for bid in bids %}
+                <tr>
+                    <td>{{ bid.user.username }}</td>
+                    <td class="bid-amount">${{ bid.amount }}</td>
+                    <td>{{ bid.created_at }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p class="no-bids">No bids yet. Be the first to bid on this player!</p>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+    // Add some interactivity
+    document.addEventListener('DOMContentLoaded', function() {
+        // Focus on the bid amount input when page loads
+        const bidInput = document.querySelector('input[name="amount"]');
+        if (bidInput) {
+            bidInput.focus();
+        }
+        
+        // Add animation to the bid button
+        const bidButton = document.querySelector('.bid-button');
+        if (bidButton) {
+            bidButton.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-2px)';
+                this.style.boxShadow = '0 4px 8px rgba(0, 184, 148, 0.4)';
+            });
+            
+            bidButton.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0)';
+                this.style.boxShadow = 'none';
+            });
+        }
+    });
+</script>
+{% endblock %}

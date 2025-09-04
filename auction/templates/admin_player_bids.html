@@ -1,0 +1,71 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<style>
+    .admin-bid-detail {
+        padding: 20px;
+    }
+    
+    .back-link {
+        display: inline-block;
+        margin-bottom: 20px;
+        color: #007bff;
+        text-decoration: none;
+    }
+    
+    .back-link:hover {
+        text-decoration: underline;
+    }
+    
+    .bid-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    
+    .bid-table th, .bid-table td {
+        padding: 12px;
+        text-align: left;
+        border-bottom: 1px solid #ddd;
+    }
+    
+    .bid-table th {
+        background-color: #f8f9fa;
+        font-weight: bold;
+    }
+    
+    .no-bids {
+        text-align: center;
+        padding: 20px;
+        font-style: italic;
+        color: #6c757d;
+    }
+</style>
+
+<div class="admin-bid-detail">
+    <h1>All Bids for {{ player.name }}</h1>
+    <a href="{% url 'admin_bid_view' %}" class="back-link">← Back to Overview</a>
+    
+    {% if bids %}
+    <table class="bid-table">
+        <thead>
+            <tr>
+                <th>User</th>
+                <th>Amount</th>
+                <th>Time</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for bid in bids %}
+            <tr>
+                <td>{{ bid.user.username }}</td>
+                <td>${{ bid.amount }}</td>
+                <td>{{ bid.created_at }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p class="no-bids">No bids found for this player.</p>
+    {% endif %}
+</div>
+{% endblock %}

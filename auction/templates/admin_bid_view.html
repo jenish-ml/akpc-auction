@@ -1,0 +1,143 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<style>
+    .admin-bid-view {
+        padding: 20px;
+    }
+    
+    .bid-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+    }
+    
+    .bid-table th, .bid-table td {
+        padding: 12px;
+        text-align: left;
+        border-bottom: 1px solid #ddd;
+    }
+    
+    .bid-table th {
+        background-color: #f8f9fa;
+        font-weight: bold;
+    }
+    
+    .bid-table tr:hover {
+        background-color: #f5f5f5;
+    }
+    
+    .no-bids {
+        text-align: center;
+        padding: 20px;
+        font-style: italic;
+        color: #6c757d;
+    }
+    
+    .stats-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+    
+    .stats-card {
+        background-color: #f8f9fa;
+        padding: 15px;
+        border-radius: 5px;
+        text-align: center;
+        flex: 1;
+        min-width: 150px;
+    }
+    
+    .stats-number {
+        font-size: 24px;
+        font-weight: bold;
+        color: #007bff;
+    }
+    
+    .view-details {
+        color: #007bff;
+        text-decoration: none;
+        padding: 5px 10px;
+        border: 1px solid #007bff;
+        border-radius: 4px;
+        transition: all 0.3s;
+    }
+    
+    .view-details:hover {
+        background-color: #007bff;
+        color: white;
+    }
+    
+    .no-action {
+        color: #6c757d;
+        font-style: italic;
+    }
+</style>
+
+<div class="admin-bid-view">
+    <h1>Admin Bid Dashboard</h1>
+    
+    <div class="stats-header">
+        <div class="stats-card">
+            <div class="stats-label">Total Players</div>
+            <div class="stats-number">{{ total_players }}</div>
+        </div>
+        <div class="stats-card">
+            <div class="stats-label">Players with Bids</div>
+            <div class="stats-number">{{ players_with_bids_count }}</div>
+        </div>
+        <div class="stats-card">
+            <div class="stats-label">Total Bids</div>
+            <div class="stats-number">{{ total_bids }}</div>
+        </div>
+    </div>
+    
+    <h2>Highest Bids for Each Player</h2>
+    
+    {% if players_with_bids %}
+    <table class="bid-table">
+        <thead>
+            <tr>
+                <th>Player Name</th>
+                <th>Position</th>
+                <th>Market_value</th>
+                <th>Highest Bid</th>
+                <th>Total Bids</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for player in players_with_bids %}
+            <tr>
+                <td>{{ player.name }}</td>
+                <td>{{ player.get_position_display }}</td>
+                <td>{{ player.market_value }}</td>
+                <td>
+                    {% if player.highest_bid %}
+                        ${{ player.highest_bid }}
+                    {% else %}
+                        No bids yet
+                    {% endif %}
+                </td>
+                <td>{{ player.bid_count }}</td>
+                <td>
+                    {% if player.bid_count > 0 %}
+                        <a href="{% url 'player_bid_detail' player.id %}" class="view-details">View All Bids</a>
+                    {% else %}
+                        <span class="no-action">No bids</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p class="no-bids">No players found in the system.</p>
+    {% endif %}
+</div>
+
+{% endblock %}
