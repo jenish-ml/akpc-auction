@@ -47,27 +47,21 @@ def user_login(request):
 
 
 def player_list(request):
-    # Initialize variables with default values
     players = Player.objects.all()
-    search_query = ''
-    position_filter = ''
     
-    # Only process GET parameters if they exist
-    if request.method == 'GET':
-        search_query = request.GET.get('search', '')
-        position_filter = request.GET.get('position', '')
-        
-        # Handle search query
-        if search_query:
-            players = players.filter(
-                models.Q(name__icontains=search_query) |
-                models.Q(position__icontains=search_query) |
-                models.Q(playing_style__icontains=search_query)
-            )
-        
-        # Handle position filter
-        if position_filter:
-            players = players.filter(position=position_filter)
+    # Handle search query
+    search_query = request.GET.get('search', '')
+    if search_query:
+        players = players.filter(
+            Q(name__icontains=search_query) |
+            Q(position__icontains=search_query) |
+            Q(playing_style__icontains=search_query)
+        )
+    
+    # Handle position filter
+    position_filter = request.GET.get('position', '')
+    if position_filter:
+        players = players.filter(position=position_filter)
     
     return render(request, 'player_list.html', {
         'players': players,
