@@ -93,6 +93,14 @@ def player_detail(request, pk):
         'form': form
     })
 
+from django.contrib.admin.views.decorators import staff_member_required
+
+@staff_member_required
+def admin_bid_view(request):
+    # Your view logic here
+    bids = Bid.objects.all().order_by('-timestamp')
+    return render(request, 'admin/bid_view.html', {'bids': bids})
+
 def is_admin(user):
     return user.is_staff
 
@@ -128,3 +136,4 @@ def player_bid_detail(request, player_id):
         'player': player,
         'bids': bids
     })
+
