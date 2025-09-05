@@ -6,6 +6,7 @@
         <div class="login-header">
             <h2>Welcome Back</h2>
             <p>Sign in to your eFootball Auction account</p>
+            <a href="{% url 'player_list' %}" class="home-link">← Back to Home</a>
         </div>
 
         {% if messages %}
@@ -45,11 +46,12 @@
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         margin: 0;
-        padding: 0;
+        padding: 20px;
         min-height: 100vh;
         display: flex;
         justify-content: center;
         align-items: center;
+        box-sizing: border-box;
     }
     
     .login-container {
@@ -69,6 +71,7 @@
     .login-header {
         text-align: center;
         margin-bottom: 25px;
+        position: relative;
     }
     
     .login-header h2 {
@@ -79,8 +82,20 @@
     
     .login-header p {
         color: #666;
-        margin: 0;
+        margin: 0 0 15px 0;
         font-size: 14px;
+    }
+    
+    .home-link {
+        display: inline-block;
+        color: #667eea;
+        text-decoration: none;
+        font-size: 14px;
+        margin-top: 10px;
+    }
+    
+    .home-link:hover {
+        text-decoration: underline;
     }
     
     .form-group {
@@ -99,7 +114,7 @@
         padding: 12px 15px;
         border: 1px solid #ddd;
         border-radius: 5px;
-        font-size: 14px;
+        font-size: 16px; /* Larger font for better mobile experience */
         box-sizing: border-box;
         transition: border-color 0.3s;
     }
@@ -155,11 +170,18 @@
         text-decoration: underline;
     }
     
-    .alert {
-        padding: 10px 15px;
-        border-radius: 5px;
+    .messages {
         margin-bottom: 20px;
+    }
+    
+    .alert {
+        padding: 12px 15px;
+        border-radius: 5px;
+        margin-bottom: 15px;
         font-size: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
     }
     
     .alert-error {
@@ -173,5 +195,98 @@
         color: #155724;
         border: 1px solid #c3e6cb;
     }
+    
+    .alert-close {
+        background: none;
+        border: none;
+        font-size: 18px;
+        cursor: pointer;
+        padding: 0;
+        margin-left: 10px;
+    }
+    
+    /* Responsive design for mobile */
+    @media (max-width: 480px) {
+        body {
+            padding: 10px;
+        }
+        
+        .login-container {
+            padding: 10px;
+        }
+        
+        .login-card {
+            padding: 20px;
+        }
+        
+        .login-header h2 {
+            font-size: 1.5rem;
+        }
+        
+        .form-input {
+            font-size: 16px; /* Prevents zoom on iOS */
+            padding: 14px 15px; /* Larger touch target */
+        }
+        
+        .alert {
+            padding: 10px 12px;
+            font-size: 13px;
+            flex-direction: column;
+            text-align: center;
+        }
+        
+        .alert-close {
+            align-self: flex-end;
+            margin-top: 5px;
+        }
+        
+        .login-button {
+            padding: 14px; /* Larger touch target */
+        }
+    }
+    
+    /* Additional mobile optimizations */
+    @media (max-width: 360px) {
+        .login-header h2 {
+            font-size: 1.3rem;
+        }
+        
+        .login-header p {
+            font-size: 13px;
+        }
+        
+        .form-group label {
+            font-size: 15px;
+        }
+        
+        .login-footer p {
+            font-size: 13px;
+        }
+    }
 </style>
+
+<script>
+    // Add functionality to close alert messages
+    document.addEventListener('DOMContentLoaded', function() {
+        // Add close buttons to alerts
+        const alerts = document.querySelectorAll('.alert');
+        alerts.forEach(alert => {
+            const closeButton = document.createElement('button');
+            closeButton.innerHTML = '&times;';
+            closeButton.classList.add('alert-close');
+            closeButton.addEventListener('click', function() {
+                alert.style.display = 'none';
+            });
+            alert.appendChild(closeButton);
+        });
+        
+        // Auto-hide success messages after 5 seconds
+        const successAlerts = document.querySelectorAll('.alert-success');
+        successAlerts.forEach(alert => {
+            setTimeout(() => {
+                alert.style.display = 'none';
+            }, 5000);
+        });
+    });
+</script>
 {% endblock %}

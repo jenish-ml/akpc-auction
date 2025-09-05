@@ -1,6 +1,7 @@
 {% extends 'base.html' %}
 
 {% block content %}
+{% load tz %}
 <style>
     .admin-bid-detail {
         padding: 20px;
@@ -59,7 +60,7 @@
             <tr>
                 <td>{{ bid.user.username }}</td>
                 <td>${{ bid.amount }}</td>
-                <td>{{ bid.created_at }}</td>
+                <td>{{ bid.created_at|localtime }}</td>
             </tr>
             {% endfor %}
         </tbody>

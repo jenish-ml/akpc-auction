@@ -181,19 +181,65 @@
         border-radius: 4px;
     }
     
-    /* Responsive design */
+    /* Tablet (≤1024px) */
+    @media (max-width: 1024px) {
+        .filter-controls {
+            flex-wrap: wrap;
+        }
+        .search-input {
+            width: 100%;
+            max-width: 400px;
+        }
+        .player-grid {
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+        }
+    }
+
+    /* Mobile (≤768px) */
     @media (max-width: 768px) {
         .filter-controls {
             flex-direction: column;
             align-items: stretch;
         }
-        
         .search-input, .position-filter, .filter-button {
             width: 100%;
         }
-        
         .player-grid {
             grid-template-columns: 1fr;
+        }
+        .player-card {
+            padding: 12px;
+        }
+        .player-image {
+            height: 180px;
+        }
+    }
+
+    /* Small mobile (≤480px) */
+    @media (max-width: 480px) {
+        h1 {
+            font-size: 1.5rem;
+            text-align: center;
+        }
+        .filter-form {
+            padding: 10px;
+        }
+        .player-card {
+            font-size: 0.9rem;
+        }
+        .player-image {
+            height: 150px;
+        }
+        .bid-button, .filter-button, .btn-cancel, .btn-login {
+            width: 100%;
+            text-align: center;
+            padding: 10px;
+            font-size: 0.95rem;
+        }
+        .modal-content {
+            width: 90%;
+            margin: 30% auto;
+            padding: 15px;
         }
     }
 </style>
@@ -205,7 +251,7 @@
     <div class="filter-controls">
         <!-- Search Input -->
         <input type="text" name="search" placeholder="Search players..." 
-               value="{{ search_query }}" class="search-input">
+               value="{{ search_query|default:'' }}" class="search-input">
         
         <!-- Position Filter -->
         <select name="position" class="position-filter">
@@ -233,14 +279,17 @@
 <div class="player-grid">
     {% for player in players %}
     <div class="player-card">
-        {% if player.image %}
-        <img src="{{ player.image.url }}" alt="{{ player.name }}">
-        {% endif %}
+        <div class="player-image">
+            {% if player.image %}
+                <img src="{{ player.image.url }}" alt="{{ player.name }}" style="width: 100%; height: 100%; object-fit: cover;">
+            {% else %}
+                No Image
+            {% endif %}
+        </div>
         <h3>{{ player.name }}</h3>
         <p>Position: {{ player.get_position_display }}</p>
-        <p>Market Value: ${{ player.market_value }}</p>
+        <p>Market Value: {{ player.market_value }}</p>
         <p>Style: {{ player.playing_style }}</p>
-        
         {% if user.is_authenticated %}
             <a href="{% url 'player_detail' player.pk %}" class="bid-button">View Details & Bid</a>
         {% else %}
@@ -251,7 +300,6 @@
     <p class="no-results">No players found matching your criteria.</p>
     {% endfor %}
 </div>
-
 
 <!-- Login Alert Modal -->
 <div id="loginAlert" class="modal">
@@ -267,46 +315,33 @@
 </div>
 
 <script>
-    // Function to show the login alert modal
     function showLoginAlert() {
         document.getElementById('loginAlert').style.display = 'block';
     }
-    
-    // Function to close the login alert modal
     function closeLoginAlert() {
         document.getElementById('loginAlert').style.display = 'none';
     }
-    
-    // Close the modal if user clicks outside of it
     window.onclick = function(event) {
         const modal = document.getElementById('loginAlert');
         if (event.target === modal) {
             closeLoginAlert();
         }
     };
-    
     document.addEventListener('DOMContentLoaded', function() {
-        // Get the position filter element
         const positionFilter = document.querySelector('.position-filter');
-        
-        // Add event listener for change event
         if (positionFilter) {
             positionFilter.addEventListener('change', function() {
-                // Submit the form when position changes
                 this.form.submit();
             });
         }
-        
-        // Optional: Add debounce to search input
         const searchInput = document.querySelector('.search-input');
         let searchTimeout;
-        
         if (searchInput) {
             searchInput.addEventListener('input', function() {
                 clearTimeout(searchTimeout);
                 searchTimeout = setTimeout(() => {
                     this.form.submit();
-                }, 500); // Submit after 500ms of no typing
+                }, 500);
             });
         }
     });

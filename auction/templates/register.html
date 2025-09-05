@@ -2,18 +2,41 @@
 
 {% block content %}
 <div class="auth-container">
-    <h2>Register</h2>
+    <div class="auth-header">
+        <h2>Create Account</h2>
+        <p>Join the eFootball Tournament Auction</p>
+        <a href="{% url 'player_list' %}" class="home-link">← Back to Home</a>
+    </div>
+
+    {% if messages %}
+    <div class="messages">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}">
+            {{ message }}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
     <form method="post" class="auth-form">
         {% csrf_token %}
         
         {% if form.errors %}
         <div class="error-message">
-            Please correct the errors below.
+            <strong>Please correct the errors below.</strong>
+            {% for field in form %}
+                {% for error in field.errors %}
+                    <div>{{ error }}</div>
+                {% endfor %}
+            {% endfor %}
+            {% for error in form.non_field_errors %}
+                <div>{{ error }}</div>
+            {% endfor %}
         </div>
         {% endif %}
         
         <div class="form-group">
-            <label for="{{ form.username.id_for_label }}">Username:</label>
+            <label for="{{ form.username.id_for_label }}">Username</label>
             {{ form.username }}
             {% if form.username.errors %}
             <div class="field-error">{{ form.username.errors }}</div>
@@ -21,7 +44,7 @@
         </div>
         
         <div class="form-group">
-            <label for="{{ form.password1.id_for_label }}">Password:</label>
+            <label for="{{ form.password1.id_for_label }}">Password</label>
             {{ form.password1 }}
             {% if form.password1.errors %}
             <div class="field-error">{{ form.password1.errors }}</div>
@@ -29,26 +52,71 @@
         </div>
         
         <div class="form-group">
-            <label for="{{ form.password2.id_for_label }}">Confirm Password:</label>
+            <label for="{{ form.password2.id_for_label }}">Confirm Password</label>
             {{ form.password2 }}
             {% if form.password2.errors %}
             <div class="field-error">{{ form.password2.errors }}</div>
             {% endif %}
         </div>
         
-        <button type="submit" class="auth-button">Register</button>
+        <button type="submit" class="auth-button">Create Account</button>
     </form>
-    <p class="auth-link">Already have an account? <a href="{% url 'login' %}">Login here</a></p>
+    
+    <div class="auth-footer">
+        <p>Already have an account? <a href="{% url 'login' %}">Sign in here</a></p>
+    </div>
 </div>
 
 <style>
-    .auth-container {
-        max-width: 400px;
-        margin: 40px auto;
+    body {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        margin: 0;
         padding: 20px;
-        background-color: #f8f9fa;
-        border-radius: 8px;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        min-height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        box-sizing: border-box;
+    }
+    
+    .auth-container {
+        width: 100%;
+        max-width: 450px;
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+        padding: 30px;
+    }
+    
+    .auth-header {
+        text-align: center;
+        margin-bottom: 25px;
+    }
+    
+    .auth-header h2 {
+        color: #333;
+        margin: 0 0 10px 0;
+        font-weight: 600;
+    }
+    
+    .auth-header p {
+        color: #666;
+        margin: 0 0 15px 0;
+        font-size: 14px;
+    }
+    
+    .home-link {
+        display: inline-block;
+        color: #667eea;
+        text-decoration: none;
+        font-size: 14px;
+        margin-top: 10px;
+    }
+    
+    .home-link:hover {
+        text-decoration: underline;
     }
     
     .auth-form {
@@ -56,56 +124,215 @@
     }
     
     .form-group {
-        margin-bottom: 15px;
+        margin-bottom: 20px;
     }
     
     .form-group label {
         display: block;
-        margin-bottom: 5px;
-        font-weight: bold;
+        margin-bottom: 8px;
+        color: #555;
+        font-weight: 500;
     }
     
     .form-group input {
         width: 100%;
-        padding: 8px 10px;
+        padding: 12px 15px;
         border: 1px solid #ddd;
-        border-radius: 4px;
+        border-radius: 5px;
+        font-size: 16px;
         box-sizing: border-box;
+        transition: border-color 0.3s;
+    }
+    
+    .form-group input:focus {
+        outline: none;
+        border-color: #667eea;
+        box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.2);
     }
     
     .field-error {
         color: #dc3545;
         font-size: 0.875em;
         margin-top: 5px;
+        list-style: none;
+        padding: 0;
+    }
+    
+    .field-error li {
+        margin: 3px 0;
     }
     
     .error-message {
-        color: #dc3545;
+        color: #721c24;
         background-color: #f8d7da;
         border: 1px solid #f5c6cb;
-        padding: 10px;
-        border-radius: 4px;
-        margin-bottom: 15px;
+        padding: 12px 15px;
+        border-radius: 5px;
+        margin-bottom: 20px;
+        font-size: 14px;
+    }
+    
+    .error-message div {
+        margin: 5px 0;
     }
     
     .auth-button {
         width: 100%;
-        padding: 10px;
-        background-color: #007bff;
+        padding: 12px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         color: white;
         border: none;
-        border-radius: 4px;
-        cursor: pointer;
+        border-radius: 5px;
         font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: transform 0.2s, box-shadow 0.2s;
     }
     
     .auth-button:hover {
-        background-color: #0056b3;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(102, 126, 234, 0.4);
     }
     
-    .auth-link {
+    .auth-button:active {
+        transform: translateY(0);
+    }
+    
+    .auth-footer {
         text-align: center;
-        margin-top: 15px;
+        margin-top: 20px;
+        padding-top: 20px;
+        border-top: 1px solid #eee;
+    }
+    
+    .auth-footer p {
+        margin: 0;
+        color: #666;
+        font-size: 14px;
+    }
+    
+    .auth-footer a {
+        color: #667eea;
+        text-decoration: none;
+        font-weight: 500;
+    }
+    
+    .auth-footer a:hover {
+        text-decoration: underline;
+    }
+    
+    .messages {
+        margin-bottom: 20px;
+    }
+    
+    .alert {
+        padding: 12px 15px;
+        border-radius: 5px;
+        margin-bottom: 15px;
+        font-size: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+    
+    .alert-error {
+        background-color: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+    }
+    
+    .alert-success {
+        background-color: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
+    }
+    
+    .alert-close {
+        background: none;
+        border: none;
+        font-size: 18px;
+        cursor: pointer;
+        padding: 0;
+        margin-left: 10px;
+    }
+    
+    /* Responsive design for mobile */
+    @media (max-width: 480px) {
+        body {
+            padding: 10px;
+        }
+        
+        .auth-container {
+            padding: 20px;
+        }
+        
+        .auth-header h2 {
+            font-size: 1.5rem;
+        }
+        
+        .form-group input {
+            font-size: 16px;
+            padding: 14px 15px;
+        }
+        
+        .error-message {
+            padding: 10px 12px;
+            font-size: 13px;
+        }
+        
+        .auth-button {
+            padding: 14px;
+        }
+    }
+    
+    /* Additional mobile optimizations */
+    @media (max-width: 360px) {
+        .auth-header h2 {
+            font-size: 1.3rem;
+        }
+        
+        .auth-header p {
+            font-size: 13px;
+        }
+        
+        .form-group label {
+            font-size: 15px;
+        }
+        
+        .auth-footer p {
+            font-size: 13px;
+        }
     }
 </style>
+
+<script>
+    // Add functionality to close alert messages
+    document.addEventListener('DOMContentLoaded', function() {
+        // Add close buttons to alerts
+        const alerts = document.querySelectorAll('.alert');
+        alerts.forEach(alert => {
+            const closeButton = document.createElement('button');
+            closeButton.innerHTML = '&times;';
+            closeButton.classList.add('alert-close');
+            closeButton.addEventListener('click', function() {
+                alert.style.display = 'none';
+            });
+            alert.appendChild(closeButton);
+        });
+        
+        // Auto-hide success messages after 5 seconds
+        const successAlerts = document.querySelectorAll('.alert-success');
+        successAlerts.forEach(alert => {
+            setTimeout(() => {
+                alert.style.display = 'none';
+            }, 5000);
+        });
+        
+        // Focus on first input field
+        const firstInput = document.querySelector('input');
+        if (firstInput) {
+            firstInput.focus();
+        }
+    });
+</script>
 {% endblock %}
