@@ -13,7 +13,7 @@ class Player(models.Model):
     name = models.CharField(max_length=100)
     position = models.CharField(max_length=2, choices=POSITION_CHOICES)
     playing_style = models.CharField(max_length=100)
-    image = models.ImageField(upload_to='players/', blank=True, null=True)
+    image_url = models.URLField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     market_value = models.DecimalField(max_digits=10, decimal_places=2, default=50.00)
     

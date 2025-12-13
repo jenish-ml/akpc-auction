@@ -13,7 +13,7 @@ class CustomUserCreationForm(UserCreationForm):
 class PlayerForm(forms.ModelForm):
     class Meta:
         model = Player
-        fields = ['name', 'position', 'market_value', 'playing_style', 'image']
+        fields = ['name', 'position', 'market_value', 'playing_style', 'image_url']
 
 class BidForm(forms.ModelForm):
     class Meta:
