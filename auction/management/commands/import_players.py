@@ -5,6 +5,13 @@ class Command(BaseCommand):
     help = 'Import players from text list'
 
     def handle(self, *args, **options):
+        from django.core.management.base import BaseCommand
+from auction.models import Player
+
+class Command(BaseCommand):
+    help = 'Import players from text list'
+
+    def handle(self, *args, **options):
         players_data = [
             # STRIKERS
             {"name": "Karim Benzema", "position": "ST", "market_value": 70},
@@ -155,7 +162,6 @@ class Command(BaseCommand):
             {"name": "Ramsdale", "position": "GK", "market_value": 50},
             {"name": "Bernd Leno", "position": "GK", "market_value": 50},
         ]
-
 
         count = 0
         for player_data in players_data:
