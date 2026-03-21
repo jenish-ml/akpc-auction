@@ -47,26 +47,57 @@
     <a href="{% url 'admin_bid_view' %}" class="back-link">← Back to Overview</a>
     
     {% if bids %}
-    <table class="bid-table">
-        <thead>
-            <tr>
-                <th>User</th>
-                <th>Amount</th>
-                <th>Time</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for bid in bids %}
-            <tr>
-                <td>{{ bid.user.username }}</td>
-                <td>${{ bid.amount }}</td>
-                <td>{{ bid.created_at|localtime }}</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+    <div class="table-responsive mt-3">
+        <table class="table table-bordered table-striped table-hover">
+            <thead class="table-dark">
+                <tr>
+                    <th>User</th>
+                    <th>Amount</th>
+                    <th>Time</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for bid in bids %}
+                <tr>
+                    <td class="align-middle fw-bold">{{ bid.user.username }}</td>
+                    <td class="align-middle text-success fw-bold">${{ bid.amount }}M</td>
+                    <td class="align-middle">{{ bid.created_at|localtime }}</td>
+                    <td class="align-middle">
+                        {% if bid.status == 'APPROVED' %}
+                            <span class="badge bg-success">Approved</span>
+                        {% elif bid.status == 'REJECTED' %}
+                            <span class="badge bg-danger">Rejected</span>
+                        {% else %}
+                            <span class="badge bg-warning text-dark">Pending</span>
+                        {% endif %}
+                    </td>
+                    <td class="align-middle">
+                        <div class="d-flex flex-wrap gap-2">
+                            {% if bid.status == 'PENDING' %}
+                            <form method="POST" action="{% url 'approve_bid' bid.id %}" style="margin: 0;">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-sm btn-success fw-bold">Approve</button>
+                            </form>
+                            <form method="POST" action="{% url 'reject_bid' bid.id %}" style="margin: 0;">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-sm btn-warning fw-bold">Reject</button>
+                            </form>
+                            {% endif %}
+                            <form method="POST" action="{% url 'delete_bid' bid.id %}" onsubmit="return confirm('Are you sure you want to delete this bid? It will immediately refund the purchase balance if it was approved.');" style="margin: 0;">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-sm btn-outline-danger fw-bold">Delete</button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
     {% else %}
-    <p class="no-bids">No bids found for this player.</p>
+    <p class="text-center text-muted fst-italic mt-4 p-4 bg-light rounded">No bids found for this player.</p>
     {% endif %}
 </div>
 {% endblock %}

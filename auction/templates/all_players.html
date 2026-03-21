@@ -1,0 +1,175 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<style>
+    /* Similar styles to player_list but simplified for viewing */
+    .filter-section {
+        background-color: white;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        margin-bottom: 20px;
+    }
+    .filter-form {
+        display: flex;
+        gap: 15px;
+        flex-wrap: wrap;
+        align-items: center;
+    }
+    .search-input, .position-filter {
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        min-width: 200px;
+    }
+    .filter-button {
+        padding: 10px 20px;
+        background-color: #007bff;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+    .player-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 20px;
+    }
+    .player-card {
+        background-color: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        padding: 20px;
+        border-top: 5px solid #007bff;
+    }
+    .player-card.assigned {
+        border-top: 5px solid #28a745;
+    }
+    .player-card.available {
+        border-top: 5px solid #ffc107;
+    }
+    .player-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 15px;
+        border-bottom: 1px solid #eee;
+        padding-bottom: 10px;
+    }
+    .player-name {
+        margin: 0;
+        font-size: 1.2rem;
+        color: #333;
+    }
+    .position-badge {
+        background-color: #17a2b8;
+        color: white;
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 0.8rem;
+        font-weight: bold;
+    }
+    .player-details p {
+        margin: 5px 0;
+        color: #666;
+    }
+    .assigned-badge {
+        display: inline-block;
+        padding: 5px 10px;
+        background-color: #28a745;
+        color: white;
+        border-radius: 4px;
+        font-size: 0.9rem;
+        margin-top: 10px;
+    }
+    .available-badge {
+        display: inline-block;
+        padding: 5px 10px;
+        background-color: #ffc107;
+        color: #000;
+        border-radius: 4px;
+        font-size: 0.9rem;
+        margin-top: 10px;
+    }
+</style>
+
+<h2>Global Player Database</h2>
+
+<div class="filter-section mb-4 p-3 bg-white rounded shadow-sm">
+    <form class="row g-2 align-items-center" method="GET">
+        <div class="col-12 col-md-4">
+            <input type="text" name="search" class="form-control" placeholder="Search players..." value="{{ search_query }}">
+        </div>
+        
+        <div class="col-12 col-md-3">
+            <select name="position" class="form-select">
+                <option value="">All Positions</option>
+                {% for value, label in position_choices %}
+                <option value="{{ value }}" {% if position_filter == value %}selected{% endif %}>
+                    {{ label }}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+        
+        <div class="col-12 col-md-3">
+            <select name="rating" class="form-select">
+                <option value="">All Ratings</option>
+                {% for choice in rating_choices %}
+                <option value="{{ choice }}" {% if rating_filter == choice %}selected{% endif %}>
+                    {{ choice }}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+        
+        <div class="col-12 col-md-2">
+            <button type="submit" class="btn btn-primary w-100">Filter Database</button>
+        </div>
+    </form>
+</div>
+
+<p>{{ page_obj.paginator.count }} players total</p>
+
+<div class="player-grid">
+    {% for player in page_obj %}
+    <div class="player-card {% if player.team %}assigned{% else %}available{% endif %}">
+        <div class="player-header">
+            <h3 class="player-name">{{ player.name }}</h3>
+            <span class="position-badge">{{ player.position }}</span>
+        </div>
+        <div class="player-details">
+            <p><strong>Rating:</strong> {{ player.rating }}</p>
+            <p><strong>Playing Style:</strong> {{ player.playing_style }}</p>
+            <p><strong>Market Value:</strong> ${{ player.market_value }}M</p>
+            
+            {% if player.team %}
+                <div class="assigned-badge">Assigned to: {{ player.team.name }}</div>
+            {% else %}
+                <div class="available-badge">Available for Auction</div>
+            {% endif %}
+        </div>
+    </div>
+    {% empty %}
+    <p>No players found in the database matching these criteria.</p>
+    {% endfor %}
+</div>
+
+<!-- Pagination -->
+{% if page_obj.has_other_pages %}
+<div style="display: flex; justify-content: center; margin-top: 30px; gap: 10px;">
+    {% if page_obj.has_previous %}
+        <a href="?page={{ page_obj.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if position_filter %}&position={{ position_filter }}{% endif %}{% if rating_filter %}&rating={{ rating_filter }}{% endif %}" style="padding: 10px; background: #ddd; text-decoration: none; color: black; border-radius: 4px;">&laquo; Previous</a>
+    {% endif %}
+
+    <span style="padding: 10px; background-color: #f8f9fa; border: 1px solid #ddd; border-radius: 4px;">
+        Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+    </span>
+
+    {% if page_obj.has_next %}
+        <a href="?page={{ page_obj.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if position_filter %}&position={{ position_filter }}{% endif %}{% if rating_filter %}&rating={{ rating_filter }}{% endif %}" style="padding: 10px; background: #ddd; text-decoration: none; color: black; border-radius: 4px;">Next &raquo;</a>
+    {% endif %}
+</div>
+{% endif %}
+
+{% endblock %}

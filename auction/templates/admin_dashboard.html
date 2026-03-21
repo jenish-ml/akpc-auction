@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+
+{% block content %}
+{% load tz %}
+<div class="container mt-4">
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+        <h2>Admin Dashboard: Teams & Balances</h2>
+        <div class="d-flex flex-wrap gap-2">
+            <a href="{% url 'admin_add_player' %}" class="btn btn-success fw-bold">+ Add Custom Player</a>
+            <a href="{% url 'admin_bid_view' %}" class="btn btn-warning fw-bold text-dark">View Bids Dashboard &raquo;</a>
+        </div>
+    </div>
+    
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card text-white bg-primary">
+                <div class="card-body">
+                    <h5 class="card-title">Total League Balance</h5>
+                    <h3>${{ total_balance }}M</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card text-white bg-success">
+                <div class="card-body">
+                    <h5 class="card-title">Total Bids Placed</h5>
+                    <h3>{{ total_bids }}</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <h4>Teams by League</h4>
+    <div class="accordion" id="leagueAccordion">
+        {% for league_code, league_name in league_choices %}
+        <div class="accordion-item">
+            <h2 class="accordion-header" id="heading{{ league_code }}">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-toggle="collapse" data-bs-target="#collapse{{ league_code }}" aria-expanded="false" aria-controls="collapse{{ league_code }}">
+                    {{ league_name }}
+                </button>
+            </h2>
+            <div id="collapse{{ league_code }}" class="accordion-collapse collapse" aria-labelledby="heading{{ league_code }}" data-bs-parent="#leagueAccordion">
+                <div class="accordion-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-striped mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Team Name</th>
+                                    <th>Balance (Millions)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for team in teams %}
+                                    {% if team.league == league_code %}
+                                    <tr class="table-info">
+                                        <td class="align-middle"><strong>{{ team.name }}</strong></td>
+                                        <td class="align-middle text-success"><strong>${{ team.balance }}M</strong></td>
+                                    </tr>
+                                    <tr>
+                                        <td colspan="2" class="bg-white">
+                                            <div class="small text-muted mb-2 fw-bold">Squad ({{ team.players.count }} players):</div>
+                                            <div class="d-flex flex-wrap gap-2">
+                                                {% for p in team.players.all %}
+                                                <span class="badge border border-secondary text-secondary bg-light">{{ p.name }} ({{ p.position }} - {{ p.rating|default:"N/A" }})</span>
+                                                {% empty %}
+                                                <span class="text-muted fst-italic">No players yet.</span>
+                                                {% endfor %}
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% endif %}
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <h4 class="mt-5">Recent Transactions</h4>
+    <div class="table-responsive">
+        <table class="table table-sm table-hover mt-3">
+            <thead class="table-dark">
+                <tr>
+                    <th>Time</th>
+                    <th>Team</th>
+                    <th>Description</th>
+                    <th>Amount</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for tx in transactions %}
+                <tr class="{% if tx.amount < 0 %}table-danger{% else %}table-success{% endif %}">
+                    <td>{{ tx.created_at|localtime|date:"M d, Y H:i" }}</td>
+                    <td>{{ tx.team.name }}</td>
+                    <td>{{ tx.description }}</td>
+                    <td><b>${{ tx.amount }}M</b></td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="4">No recent transactions.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

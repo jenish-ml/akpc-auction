@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load tz %}
 
 {% block content %}
 <style>
@@ -227,6 +228,11 @@
                 </div>
                 
                 <div class="stat-card">
+                    <div class="stat-label">Rating</div>
+                    <div class="stat-value">{{ player.rating|default:"N/A" }}</div>
+                </div>
+
+                <div class="stat-card">
                     <div class="stat-label">Playing Style</div>
                     <div class="stat-value">{{ player.playing_style }}</div>
                 </div>
@@ -235,6 +241,14 @@
     </div>
     
     <div class="bid-section">
+        {% if team %}
+        <div class="alert alert-info" role="alert" style="margin-bottom: 20px; padding: 15px; background-color: #e3f2fd; border-radius: 8px;">
+            <strong>Your Team:</strong> {{ team.name }} 
+            | <strong>Total Wallet:</strong> ${{ team.balance }}M
+            | <strong>Pending Bids (Escrow):</strong> -${{ pending_bids_total }}M
+            | <strong>Available to Bid:</strong> <span style="color: green; font-weight: bold;">${{ available_balance }}M</span>
+        </div>
+        {% endif %}
         <h2 class="section-title">Place a Bid</h2>
         <form method="post" class="bid-form">
             {% csrf_token %}
@@ -249,24 +263,36 @@
     <div class="bid-section">
         <h2 class="section-title">Current Bids</h2>
         {% if bids %}
-        <table class="bids-table">
-            <thead>
-                <tr>
-                    <th>User</th>
-                    <th>Amount</th>
-                    <th>Time</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for bid in bids %}
-                <tr>
-                    <td>{{ bid.user.username }}</td>
-                    <td class="bid-amount">${{ bid.amount }}</td>
-                    <td>{{ bid.created_at }}</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+        <div class="table-responsive">
+            <table class="bids-table table table-hover">
+                <thead class="table-dark">
+                    <tr>
+                        <th>User</th>
+                        <th>Bid Amount</th>
+                        <th>Time</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for bid in player.bids.all|dictsortreversed:"amount" %}
+                    <tr>
+                        <td>{{ bid.user.username }}</td>
+                        <td>${{ bid.amount }}M</td>
+                        <td>{{ bid.created_at|localtime }}</td>
+                        <td>
+                            {% if bid.status == 'APPROVED' %}
+                                <span class="badge bg-success">Approved & Won</span>
+                            {% elif bid.status == 'REJECTED' %}
+                                <span class="badge bg-danger">Rejected</span>
+                            {% else %}
+                                <span class="badge bg-warning text-dark">Pending Review...</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
         {% else %}
         <p class="no-bids">No bids yet. Be the first to bid on this player!</p>
         {% endif %}

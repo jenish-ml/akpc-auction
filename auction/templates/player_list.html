@@ -247,37 +247,55 @@
 <h1>Players Available for Auction</h1>
 
 <!-- Search and Filter Form -->
-<form method="get" action="{% url 'player_list' %}" class="filter-form">
-    <div class="filter-controls">
+<form method="get" action="{% url 'player_list' %}" class="filter-form mb-4">
+    <div class="row g-2 align-items-center">
         <!-- Search Input -->
-        <input type="text" name="search" placeholder="Search players..." 
-               value="{{ search_query|default:'' }}" class="search-input">
+        <div class="col-12 col-md-4">
+            <input type="text" name="search" placeholder="Search players..." 
+                   value="{{ search_query|default:'' }}" class="form-control">
+        </div>
         
         <!-- Position Filter -->
-        <select name="position" class="position-filter">
-            <option value="">All Positions</option>
-            {% for value, label in position_choices %}
-            <option value="{{ value }}" {% if position_filter == value %}selected{% endif %}>
-                {{ label }}
-            </option>
-            {% endfor %}
-        </select>
+        <div class="col-12 col-md-3">
+            <select name="position" class="form-select">
+                <option value="">All Positions</option>
+                {% for value, label in position_choices %}
+                <option value="{{ value }}" {% if position_filter == value %}selected{% endif %}>
+                    {{ label }}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <!-- Rating Filter -->
+        <div class="col-12 col-md-3">
+            <select name="rating" class="form-select">
+                <option value="">All Ratings</option>
+                {% for choice in rating_choices %}
+                <option value="{{ choice }}" {% if rating_filter == choice %}selected{% endif %}>
+                    {{ choice }}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
         
         <!-- Submit Button -->
-        <button type="submit" class="filter-button">Apply Filters</button>
-        
-        <!-- Clear Filters -->
-        {% if search_query or position_filter %}
-        <a href="{% url 'player_list' %}" class="clear-filters">Clear Filters</a>
-        {% endif %}
+        <div class="col-12 col-md-2">
+            <div class="d-flex gap-2 align-items-center">
+                <button type="submit" class="btn btn-primary w-100">Filter</button>
+                {% if search_query or position_filter or rating_filter %}
+                <a href="{% url 'player_list' %}" class="btn btn-outline-secondary btn-sm">Clear</a>
+                {% endif %}
+            </div>
+        </div>
     </div>
 </form>
 
 <!-- Player Count -->
-<p class="player-count">{{ players.count }} player{{ players.count|pluralize }} found</p>
+<p class="player-count">{{ page_obj.paginator.count }} player{{ page_obj.paginator.count|pluralize }} found</p>
 
 <div class="player-grid">
-    {% for player in players %}
+    {% for player in page_obj %}
     <div class="player-card">
         <div class="player-image">
             {% if player.image_url %}
@@ -300,6 +318,23 @@
     <p class="no-results">No players found matching your criteria.</p>
     {% endfor %}
 </div>
+
+<!-- Pagination Controls -->
+{% if page_obj.has_other_pages %}
+<div style="display: flex; justify-content: center; margin-top: 30px; gap: 10px;">
+    {% if page_obj.has_previous %}
+        <a href="?page={{ page_obj.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if position_filter %}&position={{ position_filter }}{% endif %}{% if rating_filter %}&rating={{ rating_filter }}{% endif %}" class="btn-cancel" style="text-decoration: none;">&laquo; Previous</a>
+    {% endif %}
+
+    <span style="padding: 8px 16px; background-color: #f8f9fa; border: 1px solid #ddd; border-radius: 4px;">
+        Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+    </span>
+
+    {% if page_obj.has_next %}
+        <a href="?page={{ page_obj.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if position_filter %}&position={{ position_filter }}{% endif %}{% if rating_filter %}&rating={{ rating_filter }}{% endif %}" class="btn-cancel" style="text-decoration: none;">Next &raquo;</a>
+    {% endif %}
+</div>
+{% endif %}
 
 <!-- Login Alert Modal -->
 <div id="loginAlert" class="modal">
