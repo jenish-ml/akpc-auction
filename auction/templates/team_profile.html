@@ -156,4 +156,87 @@
     </p>
     {% endif %}
 </div>
+
+{% if is_own_profile %}
+<div class="row mt-4">
+    <!-- Active Highest Bids Section -->
+    <div class="col-lg-6 mb-4">
+        <div class="card h-100 shadow-sm border-0">
+            <div class="card-header bg-success text-white py-3">
+                <h4 class="mb-0 fw-bold">Currently Leading Bids</h4>
+            </div>
+            <div class="card-body p-0">
+                {% if highest_bids %}
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Player</th>
+                                <th>Locked Amount</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for bid in highest_bids %}
+                            <tr>
+                                <td class="align-middle fw-bold"><a href="{% url 'player_detail' bid.player.id %}" class="text-decoration-none">{{ bid.player.name }}</a></td>
+                                <td class="align-middle text-success fw-bold">${{ bid.amount }}M</td>
+                                <td class="align-middle"><span class="badge bg-warning text-dark">Leading</span></td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="p-4 text-center text-muted font-italic">You currently have no active highest bids locking your funds.</div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <!-- All Bidding History Section -->
+    <div class="col-lg-6 mb-4">
+        <div class="card h-100 shadow-sm border-0">
+            <div class="card-header bg-dark text-white py-3">
+                <h4 class="mb-0 fw-bold">My Bidding History</h4>
+            </div>
+            <div class="card-body p-0">
+                {% if my_bids %}
+                <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light" style="position: sticky; top: 0; z-index: 1;">
+                            <tr>
+                                <th>Player</th>
+                                <th>Amount</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for bid in my_bids %}
+                            <tr>
+                                <td class="align-middle fw-bold"><a href="{% url 'player_detail' bid.player.id %}" class="text-decoration-none text-dark">{{ bid.player.name }}</a></td>
+                                <td class="align-middle">${{ bid.amount }}M</td>
+                                <td class="align-middle">
+                                    {% if bid.status == 'PENDING' %}
+                                        <span class="badge bg-warning text-dark">Pending</span>
+                                    {% elif bid.status == 'APPROVED' %}
+                                        <span class="badge bg-success">Won</span>
+                                    {% else %}
+                                        <span class="badge bg-danger">Outbid</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="p-4 text-center text-muted font-italic">No bidding history found on your account.</div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
 {% endblock %}

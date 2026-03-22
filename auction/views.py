@@ -215,10 +215,19 @@ def team_profile(request, team_id=None):
     players = team.players.all()
     five_star_count = players.filter(rating='5⭐️').count()
     
+    # Extract Bidding History globally for this specific team's linked users
+    my_bids = Bid.objects.filter(user__userprofile__team=team).select_related('player').order_by('-created_at')[:60]
+    
+    # Extract Mathematical Leaders. Because our 'place_bid' natively mass-rejects inferior bids, 
+    # any bid remaining in PENDING status owned by this team is unequivocally the leading bid globally.
+    highest_bids = Bid.objects.filter(user__userprofile__team=team, status='PENDING').select_related('player').order_by('-amount')
+    
     return render(request, 'team_profile.html', {
         'team': team,
         'players': players,
         'five_star_count': five_star_count,
+        'my_bids': my_bids,
+        'highest_bids': highest_bids,
         'is_own_profile': team_id is None or getattr(request.user.userprofile, 'team', None) == team
     })
 
