@@ -106,6 +106,12 @@ def player_detail(request, pk):
                     messages.error(request, 'Your squad already has the maximum of 7 5⭐️ players.')
                     return redirect('player_detail', pk=pk)
 
+                # Fetch highest existing pending bid to validate new bid amount
+                highest_existing_bid = Bid.objects.filter(player=player, status='PENDING').aggregate(Max('amount'))['amount__max']
+                if highest_existing_bid and bid_amount <= highest_existing_bid:
+                    messages.error(request, f'Your bid of ${bid_amount}M is too low! You must bid higher than the current pending bid of ${highest_existing_bid}M.')
+                    return redirect('player_detail', pk=pk)
+
                 pending_bids_total = Bid.objects.filter(user__userprofile__team=team, status='PENDING').aggregate(Sum('amount'))['amount__sum'] or 0
                 available_balance = team.balance - pending_bids_total
 
@@ -118,7 +124,10 @@ def player_detail(request, pk):
                         bid.status = 'PENDING'
                         bid.save()
                         
-                        messages.success(request, f'Successfully placed a pending bid of ${bid_amount}M for {player.name}. Admin approval required.')
+                        # Automatically unlock previous locked funds by rejecting all older pending bids
+                        Bid.objects.filter(player=player, status='PENDING').exclude(id=bid.id).update(status='REJECTED')
+                        
+                        messages.success(request, f'Successfully placed highest bid of ${bid_amount}M for {player.name}! Previous bidders have had their funds restored.')
             except Exception as e:
                 messages.error(request, 'An error occurred processing your bid.')
                 
